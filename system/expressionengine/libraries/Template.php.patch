@@ -1,15 +1,15 @@
---- Template.php.original	2013-07-16 16:52:09.618593100 +0200
-+++ Template.php	2013-07-16 17:01:52.326922100 +0200
-@@ -1463,8 +1463,10 @@
+--- Template.php.original	2013-10-03 13:34:22.424113100 +0200
++++ Template.php	2013-10-03 13:36:22.008953000 +0200
+@@ -1425,6 +1425,12 @@
  	 */
  	public function fetch_param($which, $default = FALSE)
  	{
--        if($which == 'status') {
--            echo "status";
 +        if ($this->EE->extensions->active_hook('template_fetch_param') === TRUE)
 +        {
 +            $value = $this->EE->extensions->call('template_fetch_param', $this, $this->tagparts, $which, isset($this->tagparams[$which]) ? $this->tagparams[$which] : $default);
 +            $this->tagparams[$which] = $value;
-         }
- 
++        }
++
  		if ( ! isset($this->tagparams[$which]))
+ 		{
+ 			return $default;
