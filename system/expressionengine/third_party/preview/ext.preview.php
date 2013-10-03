@@ -179,10 +179,13 @@ class Preview_ext {
 
     public function on_entry_submission_absolute_end($entry_id, $meta, $data, $view_url)
     {
-        if($meta['status'] == 'Preview' && $this->EE->session->userdata('group_id') == 1) {
+        $is_preview = $meta['status'] == 'Preview';
+        $is_draft = $meta['status'] == 'Draft';
+
+        if(($is_preview || $is_draft ) && $this->EE->session->userdata('group_id') == 1) {
             $this->EE->extensions->end_script = TRUE;
 
-            $edit_url = str_replace(AMP, '&', BASE)."&C=content_publish&M=entry_form&channel_id=4&entry_id=".$entry_id."&preview=y";
+            $edit_url = str_replace(AMP, '&', BASE)."&C=content_publish&M=entry_form&channel_id=4&entry_id=".$entry_id. ($is_preview?"&preview=y":"");
             Header("Location: ".$edit_url);
             die();
         }
@@ -211,8 +214,17 @@ class Preview_ext {
             $('#status').val('Preview');
         });
 
+        $('.save_button').live('click', function(e) {
+            var current_entry_id = $('[name=entry_id]').val();
+            var current_status = $('#status').val();
+            if(current_entry_id == '0' || current_status == 'Preview' ) {
+                $('#status').val('Draft');  // set to draft if this is a first save
+            }
+        });
+
         $('#submit_button').live('click', function(e) {
-            if($('#status').val() == 'Preview') {
+            var current_status = $('#status').val();
+            if(current_status == 'Preview' || current_status == 'Draft') {
                 $('#status').val('open');
             }
         });
@@ -221,7 +233,25 @@ class Preview_ext {
         {
             if($('#submit_button').length > 0) {
                 $('#submit_button').val('Publish');
-                $('#submit_button').parent().prepend( '<input type=submit value=Preview class=\"submit preview_button\" style=\"background:#F5C400\" name=preview_submit>&nbsp;');
+                $('#submit_button').css('background', 'green');
+
+                // find the current status and display it
+                var current_status = $('#status').val();
+                var the_entry_id = $('[name=entry_id]').val();
+
+                var current_status_text = false;
+                if(current_status == 'open' && the_entry_id != '0') {
+                    current_status_text = 'Published';
+                } else if(current_status == 'Preview') {
+                    current_status_text = 'In Preview';
+                } else if(current_status == 'Draft' || the_entry_id == '0') {
+                    current_status_text = 'Draft (not published)';
+                }
+                if(current_status_text) {
+                    $('#publish_submit_buttons').prepend('<li style=\"margin-right: 7px; color: #5F6C74;\">Current status: <strong>'+current_status_text+'</strong></li>');
+                }
+
+                $('#submit_button').parent().prepend( '<input type=submit value=Preview class=\"submit preview_button\" style=\"background:#F5C400\" name=preview_submit>&nbsp;<input type=submit value=Save class=\"submit save_button\" name=save_submit>&nbsp;');
             }
 
             if(window.location.href.indexOf('preview=y') > 0) {
