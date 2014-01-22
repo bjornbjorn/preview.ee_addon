@@ -186,6 +186,14 @@ class Preview_ext {
             $this->EE->extensions->end_script = TRUE;
 
             $edit_url = str_replace(AMP, '&', BASE)."&C=content_publish&M=entry_form&channel_id=4&entry_id=".$entry_id. ($is_preview?"&preview=y":"");
+
+            // Support for Structure Pages (ie. not listings)
+            // Structure requires "parent_id=X" to be added to the URL when editing
+            /*if(isset($data['revision_post']) && isset($data['revision_post']['structure__parent_id'])) {
+                $structure_parent_id = $data['revision_post']['structure__parent_id'];
+                $edit_url .= '&parent_id='.$structure_parent_id;
+            }*/
+
             Header("Location: ".$edit_url);
             die();
         }
@@ -210,58 +218,63 @@ class Preview_ext {
 
         $(document).ready(function(){
 
-        $('.preview_button').live('click', function(e) {
-            $('#status').val('Preview');
-        });
-
-        $('.save_button').live('click', function(e) {
-            var current_entry_id = $('[name=entry_id]').val();
-            var current_status = $('#status').val();
-            if(current_entry_id == '0' || current_status == 'Preview' ) {
-                $('#status').val('Draft');  // set to draft if this is a first save
+            // disable for Structure Pages for now (only listings preview)
+            if(window.location.href.indexOf('parent_id=') > 0) {
+                return;
             }
-        });
 
-        $('#submit_button').live('click', function(e) {
-            var current_status = $('#status').val();
-            if(current_status == 'Preview' || current_status == 'Draft') {
-                $('#status').val('open');
-            }
-        });
+            $('.preview_button').live('click', function(e) {
+                $('#status').val('Preview');
+            });
 
-        if(window.location.href.indexOf('content_publish') > 0 || window.location.href.indexOf('entry_form') > 0)
-        {
-            if($('#submit_button').length > 0) {
-                $('#submit_button').val('Publish');
-                $('#submit_button').css('background', 'green');
-
-                // find the current status and display it
+            $('.save_button').live('click', function(e) {
+                var current_entry_id = $('[name=entry_id]').val();
                 var current_status = $('#status').val();
-                var the_entry_id = $('[name=entry_id]').val();
-
-                var current_status_text = false;
-                if(current_status == 'open' && the_entry_id != '0') {
-                    current_status_text = 'Published';
-                } else if(current_status == 'Preview') {
-                    current_status_text = 'In Preview';
-                } else if(current_status == 'Draft' || the_entry_id == '0') {
-                    current_status_text = 'Draft (not published)';
+                if(current_entry_id == '0' || current_status == 'Preview' ) {
+                    $('#status').val('Draft');  // set to draft if this is a first save
                 }
-                if(current_status_text) {
-                    $('#publish_submit_buttons').prepend('<li style=\"margin-right: 7px; color: #5F6C74;\">Current status: <strong>'+current_status_text+'</strong></li>');
+            });
+
+            $('#submit_button').live('click', function(e) {
+                var current_status = $('#status').val();
+                if(current_status == 'Preview' || current_status == 'Draft') {
+                    $('#status').val('open');
+                }
+            });
+
+            if(window.location.href.indexOf('content_publish') > 0 || window.location.href.indexOf('entry_form') > 0)
+            {
+                if($('#submit_button').length > 0) {
+                    $('#submit_button').val('Publish');
+                    $('#submit_button').css('background', 'green');
+
+                    // find the current status and display it
+                    var current_status = $('#status').val();
+                    var the_entry_id = $('[name=entry_id]').val();
+
+                    var current_status_text = false;
+                    if(current_status == 'open' && the_entry_id != '0') {
+                        current_status_text = 'Published';
+                    } else if(current_status == 'Preview') {
+                        current_status_text = 'In Preview';
+                    } else if(current_status == 'Draft' || the_entry_id == '0') {
+                        current_status_text = 'Draft (not published)';
+                    }
+                    if(current_status_text) {
+                        $('#publish_submit_buttons').prepend('<li style=\"margin-right: 7px; color: #5F6C74;\">Current status: <strong>'+current_status_text+'</strong></li>');
+                    }
+
+                    $('#submit_button').parent().prepend( '<input type=submit value=Preview class=\"submit preview_button\" style=\"background:#F5C400\" name=preview_submit>&nbsp;<input type=submit value=Save class=\"submit save_button\" name=save_submit>&nbsp;');
                 }
 
-                $('#submit_button').parent().prepend( '<input type=submit value=Preview class=\"submit preview_button\" style=\"background:#F5C400\" name=preview_submit>&nbsp;<input type=submit value=Save class=\"submit save_button\" name=save_submit>&nbsp;');
+                if(window.location.href.indexOf('preview=y') > 0) {
+                    var the_entry_id = $('[name=entry_id]').val();
+                    if(page_preview_urls[the_entry_id]) {
+                        var preview_url = page_preview_urls[the_entry_id];
+                        window.open(preview_url);
+                    }
+                }
             }
-
-            if(window.location.href.indexOf('preview=y') > 0) {
-                var the_entry_id = $('[name=entry_id]').val();
-                if(page_preview_urls[the_entry_id]) {
-                    var preview_url = page_preview_urls[the_entry_id];
-                    window.open(preview_url);
-                }
-            }
-        }
         });";
 
         return $this->EE->extensions->last_call.$out_js;
