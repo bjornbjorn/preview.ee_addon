@@ -203,7 +203,6 @@ class Preview_ext {
      * Add the "Preview" button here
      */
     public function on_cp_js_end() {
-
         $site_pages = $this->EE->config->item('site_pages');
         $current_site_pages = $site_pages[ $this->EE->config->item('site_id')];
 
@@ -253,7 +252,10 @@ class Preview_ext {
                     var the_entry_id = $('[name=entry_id]').val();
 
                     var current_status_text = false;
-                    if(current_status == 'open' && the_entry_id != '0') {
+                    if(the_entry_id == '0') {
+                        current_status_text = 'Not saved!';
+                    }
+                    else if(current_status == 'open' && the_entry_id != '0') {
                         current_status_text = 'Published';
                     } else if(current_status == 'Preview') {
                         current_status_text = 'In Preview';
