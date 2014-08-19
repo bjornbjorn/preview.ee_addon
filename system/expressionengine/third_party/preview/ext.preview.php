@@ -223,21 +223,21 @@ class Preview_ext {
             }
 
             $('.preview_button').live('click', function(e) {
-                $('#status').val('Preview');
+                $('select[name=status]').val('Preview');
             });
 
             $('.save_button').live('click', function(e) {
                 var current_entry_id = $('[name=entry_id]').val();
-                var current_status = $('#status').val();
+                var current_status = $('select[name=status]').val();
                 if(current_entry_id == '0' || current_status == 'Preview' ) {
-                    $('#status').val('Draft');  // set to draft if this is a first save
+                    $('select[name=status]').val('Draft');  // set to draft if this is a first save
                 }
             });
 
             $('#submit_button').live('click', function(e) {
-                var current_status = $('#status').val();
+                var current_status = $('select[name=status]').val();
                 if(current_status == 'Preview' || current_status == 'Draft') {
-                    $('#status').val('open');
+                    $('select[name=status]').val('open');
                 }
             });
 
@@ -248,7 +248,7 @@ class Preview_ext {
                     $('#submit_button').css('background', 'green');
 
                     // find the current status and display it
-                    var current_status = $('#status').val();
+                    var current_status = $('select[name=status]').val();
                     var the_entry_id = $('[name=entry_id]').val();
 
                     var current_status_text = false;
