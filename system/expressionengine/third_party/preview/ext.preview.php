@@ -32,7 +32,7 @@ class Preview_ext {
 	public $docs_url		= 'http://wedoaddons.com';
 	public $name			= 'Preview';
 	public $settings_exist	= 'y';
-	public $version			= '1.0';
+	public $version			= '1.0.1';
 	
 	private $EE;
 	
